@@ -1,46 +1,44 @@
 import React, { useState, useRef, useEffect } from "react";
 import axios from 'axios';
 import Navbar from "../components/Navbar";
-import Button from "../components/Button";
 import Lottie from 'lottie-react';
 import animationData from '../components/lot.json';
-import { useSelector, useDispatch } from "react-redux"; // Import the useSelector hook
+import { useSelector } from "react-redux";
 import classNames from "classnames";
 import upload from "../assets/upload.svg";
 import mic from "../assets/mic.svg";
 import animationData1 from '../components/lot.json';
 import animationData2 from '../components/lots2.json';
-import Loading from '../components/Loading.jsx';
 import confetti from 'canvas-confetti';
 
-const Sentiment = (props) => {
+const Sentiment = () => {
   const [audioFile, setAudioFile] = useState(null);
-  // const [predictedEmotion, setPredictedEmotion] = useState(null);
+  const [predictedEmotion, setPredictedEmotion] = useState(null);
   const [predictedText, setPredictedText] = useState(null);
-  const [audioUrl, setAudioUrl] = useState(null);  // New state to store the audio URL
-  const audioRef = useRef(null);  // Ref for the audio element
-  const isAuthenticated = useSelector((state) => state.user.isAuthenticated); // Access the isAuthenticated state from the Redux store
+  const [sentimentAnalysis, setSentimentAnalysis] = useState(null);
+  const [audioUrl, setAudioUrl] = useState(null);
+  const audioRef = useRef(null);
+  const isAuthenticated = useSelector((state) => state.user.isAuthenticated);
   const token = useSelector(state => state.user.token);
   const [isSelected, setIsSelected] = useState(false);
-  const [loading, setLoading] = useState(false); // Loading state
+  const [loading, setLoading] = useState(false);
 
   const audioChunks = useRef([]);
   const [recordings, setRecordings] = useState([]);
   const mediaRecorderRef = useRef(null);
   const [recordingOrNotRecording, setRecordingOrNotRecording] = useState(false);
 
-  
   useEffect(() => {
-    // Your function to be triggered when isSelected changes
     resetValues();
   }, [isSelected]);
 
   const resetValues = () => {
-    // setPredictedEmotion(null);
+    setPredictedEmotion(null);
     setAudioUrl(null);
     setRecordings([]);
     setAudioFile(null);
     setPredictedText(null);
+    setSentimentAnalysis(null);
   }
 
   const startRec = async () => {
@@ -77,10 +75,10 @@ const Sentiment = (props) => {
   };
 
   const handlePredict1 = async () => {
-    setLoading(true); // Set loading to true when predicting starts
+    setLoading(true);
     const formData = new FormData();
-    formData.append('file', audioFile, 'recording.wav'); // Append with file name
-  
+    formData.append('file', audioFile, 'recording.wav');
+
     try {
       const response = await axios.post('http://127.0.0.1:8000/api/predict/prediction-emotion-sentiment/', formData, {
         headers: {
@@ -88,14 +86,14 @@ const Sentiment = (props) => {
           'Authorization': `Bearer ${token.access}`,
         },
       });
-  
+
       if (response.data.error) {
         alert(`Error: ${response.data.error}`);
       } else {
-        // setPredictedEmotion(response.data.prediction_result);
+        setPredictedEmotion(response.data.prediction_result);
         setPredictedText(response.data.txt);
-        console.log(response.data)
-        // Trigger confetti animation on successful prediction
+        setSentimentAnalysis(response.data.sentiment);
+
         confetti({
           particleCount: 100,
           angle: 60,
@@ -108,7 +106,7 @@ const Sentiment = (props) => {
     } catch (error) {
       console.error('Error making prediction:', error);
     } finally {
-      setLoading(false); // Set loading to false when prediction is done
+      setLoading(false);
     }
   };
 
@@ -119,7 +117,7 @@ const Sentiment = (props) => {
     setAudioFile(file);
     setAudioUrl(URL.createObjectURL(file));  // Create a URL for the uploaded file
     // Reset predicted emotion when a new file is uploaded
-    setPredictedText(null);
+    setPredictedEmotion(null);
   };
 
   const handleUploadButton = () => {
@@ -128,138 +126,167 @@ const Sentiment = (props) => {
 
   return (
     <>
-      <Navbar />
-      <div className="w-full h-full flex flex-col items-center justify-center mt-8">
-      <h1 className="text-4xl text-center mb-16">
-          <span className="text-3xl font-semibold dark:text-white">Decode Your Voice,</span> <br/>
-          <span className="text-3xl font-semibold text-rose-500">Discover Your True Emotions</span> <br/>
-          <span className="text-3xl font-semibold dark:text-white">Sentiment Analysis</span>
-        </h1>
+    <Navbar />
+    <div className="w-full h-full flex flex-col items-center justify-center mt-8  text-white">
+      <h1 className="text-4xl text-center mb-16 animate-pulse">
+        <span className="text-3xl font-semibold">Decode Your Voice,</span> <br />
+        <span className="text-3xl font-semibold">Discover Your True Emotions</span> <br />
+        <span className="text-3xl font-semibold">Sentiment Analysis</span>
+      </h1>
 
-        {/* Loading bar */}
-        {loading && (
-          <div className="w-full bg-gray-300 h-2 rounded-full overflow-hidden">
-            <div className="bg-rose-500 h-full animate-loading-bar"></div>
-          </div>
-        )}
+      {/* Loading bar */}
+      {loading && (
+        <div className="w-full bg-gray-300 h-2 rounded-full overflow-hidden">
+          <div className="bg-white h-full animate-loading-bar"></div>
+        </div>
+      )}
 
-        {/* Upload Button (Centered) */}
-        {/* Upload Button (Centered) */}
-        {isSelected && (
-  <div className="relative overflow-hidden">
-    <input
-      type="file"
-      className="hidden"
-      onChange={handleUpload}
-      accept="audio/*"
-      ref={audioFileInputRef}
-    />
-    <Lottie
-      animationData={animationData}
-      className="lottie-animation-home cursor-pointer"
-      onClick={handleUploadButton}
-    />
-  </div>
-)}
+      {/* Upload Button (Centered) */}
+      {isSelected && (
+        <label className="relative overflow-hidden">
+          <input
+            type="file"
+            className="hidden"
+            onChange={handleUpload}
+            accept="audio/*"
+            ref={audioFileInputRef}
+          />
+          <Lottie
+            animationData={animationData}
+            className="lottie-animation-home cursor-pointer animate-bounce"
+            onClick={handleUploadButton}
+          />
+        </label>
+      )}
 
-        {audioUrl && isSelected && (
-          <>
-          <audio ref={audioRef} controls>
+      {audioUrl && isSelected && (
+        <>
+          <audio ref={audioRef} controls className="mt-4">
             <source src={audioUrl} type="audio/wav" />
             Your browser does not support the audio element.
           </audio>
-          <a href={audioUrl} download={`recordings.wav`}>download</a>
-          </>
-        )}
+          <a href={audioUrl} download={`recordings.wav`} className="mt-2 underline hover:text-rose-300">
+            Download
+          </a>
+        </>
+      )}
 
-        {/* Predict Button (Visible only after uploading) */}
-        {audioFile && isSelected && (
-          <div
-            className="bg-rose-500 hover:bg-rose-600 px-6 py-3 mt-4 rounded-full text-white cursor-pointer transition-all duration-300"
-            onClick={handlePredict1}
-          >
-            Predict
-          </div>
-        )}
-
-        {/* Display Predicted Emotion */}
-        {predictedText && isSelected && (
-          <div className="mt-8 text-2xl text-rose-500 font-normal">
-              <span className="text-3xl font-semibold dark:text-white">{predictedText}</span><br/>
-          </div>
-        )}
-
-
-        {/* recording part */}
-
-        {!recordingOrNotRecording && !isSelected && (
-            <Lottie
-            animationData={animationData1}
-            className="lottie-animation-home cursor-pointer"
-            onClick={startRec}
-          />
-          )
-          }
-
-
-        {recordingOrNotRecording && !isSelected &&(
-            <Lottie
-            animationData={animationData2}
-            className="lottie-animation-home cursor-pointer"
-          />
-          )
-          }
-
-          {recordings.map((recUrl, index) => (
-            <div key={index}>
-              <audio controls src={recUrl} />
-              <a href={recUrl} style={{color:"white"}} download={`recordings-${index}.wav`}>
-                Download
-              </a>
-            </div>
-          ))}
-
-          {!isSelected && audioFile && (
-            <button onClick={handlePredict1} className="bg-rose-500 hover:bg-rose-600 px-6 py-3 mt-4 rounded-full text-white cursor-pointer transition-all duration-300">
-            Predict
-          </button>
-          )}
-
-          {
-            !isSelected && predictedText && (
-              <div className="mt-8 text-2xl text-rose-500 font-normal">
-              <span className="text-3xl font-semibold dark:text-white">{predictedText}</span><br/>
-              {/* {sentimentAnalysis.map((sentiment, index) => (
-                <div key={index}>
-                  <p>{sentiment}</p>
-                </div>
-              ))} */}
-            </div>
-
-
-            )
-          }
-
-
-
-
-
+      {/* Predict Button (Visible only after uploading) */}
+      {audioFile && isSelected && (
         <div
-        onClick={() => setIsSelected(!isSelected)}
-        className={classNames("flex w-20 h-10 bg-gray-600 m-10 rounded-full",
-        {
-          'bg-green':isSelected,
-        })}>
-          <span className={
-            classNames('h-10 w-10 bg-white rounded-full transition-all',
-            {'ml-10': isSelected,})}>
-              {isSelected && <img src={upload} className="p-1"/>}
-              {!isSelected && <img src={mic}/>}
-            </span>
+          className="bg-white text-rose-500 hover:bg-rose-300 hover:text-white px-6 py-3 mt-4 rounded-full cursor-pointer transition-all duration-300 animate-pulse"
+          onClick={handlePredict1}
+        >
+          Predict
         </div>
+      )}
 
+      {/* Display Predicted Emotion and Sentiment Analysis */}
+      {(predictedEmotion || predictedText || sentimentAnalysis) && isSelected && (
+        <div className="mt-8 text-2xl font-normal animate-bounce">
+          {predictedEmotion && (
+            <div>
+              Decode the Feels: Emotion Unveiled - {predictedEmotion}
+            </div>
+          )}
+          {predictedText && (
+            <div className="mt-4">
+              <span className="text-3xl font-semibold">{predictedText}</span>
+            </div>
+          )}
+          {sentimentAnalysis && (
+            <div className="mt-4">
+              <h2 className="text-2xl font-bold">Sentiment Analysis:</h2>
+              <div className="grid grid-cols-3 gap-4 mt-2">
+                {Object.entries(sentimentAnalysis).map(([sentiment, value]) => (
+                  <div key={sentiment} className="bg-white text-rose-500 rounded-lg p-4">
+                    <p className="font-bold">{sentiment}</p>
+                    <p>{value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Recording part */}
+      {!recordingOrNotRecording && !isSelected && (
+        <Lottie
+          animationData={animationData1}
+          className="lottie-animation-home cursor-pointer animate-pulse"
+          onClick={startRec}
+        />
+      )}
+
+      {recordingOrNotRecording && !isSelected && (
+        <Lottie
+          animationData={animationData2}
+          className="lottie-animation-home cursor-pointer animate-spin"
+        />
+      )}
+
+      {recordings.map((recUrl, index) => (
+        <div key={index} className="mt-4">
+          <audio controls src={recUrl} />
+          <a href={recUrl} className="ml-2 underline hover:text-rose-300" download={`recordings-${index}.wav`}>
+            Download
+          </a>
+        </div>
+      ))}
+
+      {!isSelected && audioFile && (
+        <button onClick={handlePredict1} className="bg-white text-rose-500 hover:bg-rose-300 hover:text-white px-6 py-3 mt-4 rounded-full cursor-pointer transition-all duration-300 animate-pulse">
+          Predict
+        </button>
+      )}
+
+      {!isSelected && (predictedEmotion || predictedText || sentimentAnalysis) && (
+        <div className="mt-8 text-2xl font-normal justify-center">
+          {predictedEmotion && (
+            <div>
+              Decode the Feels: Emotion Unveiled - {predictedEmotion}
+            </div>
+          )}
+          {predictedText && (
+            <div className="mt-4">
+              <span className="text-3xl font-semibold text-center">{predictedText}</span>
+            </div>
+          )}
+          {sentimentAnalysis && (
+            <div className="mt-4 justify-center">
+              <h2 className="text-2xl font-bold text-center">Sentiment:</h2>
+              <div className="grid grid-cols-3 gap-4 mt-2 content-center">
+                {Object.entries(sentimentAnalysis).map(([sentiment, value]) => (
+                  <div key={sentiment} className="bg-white text-rose-500 rounded-lg p-4">
+                    <p className="font-bold">{sentiment}</p>
+                    <p>{value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      <div
+        onClick={() => setIsSelected(!isSelected)}
+        className={classNames("flex w-20 h-10 bg-white m-10 rounded-full cursor-pointer transition-all duration-300", {
+          'bg-green-500': isSelected,
+        })}
+      >
+        <span
+          className={classNames('h-10 w-10 bg-rose-500 rounded-full flex items-center justify-center transition-all duration-300', {
+            'ml-10': isSelected,
+          })}
+        >
+          {isSelected && <img src={upload} className="p-1 animate-spin" />}
+          {!isSelected && <img src={mic} className="animate-pulse" />}
+        </span>
       </div>
-    </>
-  );
+    </div>
+  </>
+);
 };
+
 export default Sentiment;
