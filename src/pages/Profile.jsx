@@ -52,7 +52,7 @@ const Profile = () => {
             </div>
         </div>
       </div>
-      <motion.div
+      {/* <motion.div
         className={`absolute ${wavePosition === 'bottom' ? 'bottom-0' : 'top-0'} w-full`}
         initial="hidden"
         animate="visible"
@@ -70,7 +70,7 @@ const Profile = () => {
             points: 3,
           }}
         />
-      </motion.div>
+      </motion.div> */}
     </div>
     </>
   );

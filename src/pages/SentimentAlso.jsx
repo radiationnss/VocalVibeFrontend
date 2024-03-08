@@ -15,7 +15,7 @@ import confetti from 'canvas-confetti';
 
 const Sentiment = (props) => {
   const [audioFile, setAudioFile] = useState(null);
-  const [predictedEmotion, setPredictedEmotion] = useState(null);
+  // const [predictedEmotion, setPredictedEmotion] = useState(null);
   const [predictedText, setPredictedText] = useState(null);
   const [audioUrl, setAudioUrl] = useState(null);  // New state to store the audio URL
   const audioRef = useRef(null);  // Ref for the audio element
@@ -36,7 +36,7 @@ const Sentiment = (props) => {
   }, [isSelected]);
 
   const resetValues = () => {
-    setPredictedEmotion(null);
+    // setPredictedEmotion(null);
     setAudioUrl(null);
     setRecordings([]);
     setAudioFile(null);
@@ -92,8 +92,9 @@ const Sentiment = (props) => {
       if (response.data.error) {
         alert(`Error: ${response.data.error}`);
       } else {
-        setPredictedEmotion(response.data.prediction_result);
+        // setPredictedEmotion(response.data.prediction_result);
         setPredictedText(response.data.txt);
+        console.log(response.data)
         // Trigger confetti animation on successful prediction
         confetti({
           particleCount: 100,
@@ -118,7 +119,7 @@ const Sentiment = (props) => {
     setAudioFile(file);
     setAudioUrl(URL.createObjectURL(file));  // Create a URL for the uploaded file
     // Reset predicted emotion when a new file is uploaded
-    setPredictedEmotion(null);
+    setPredictedText(null);
   };
 
   const handleUploadButton = () => {
@@ -143,20 +144,23 @@ const Sentiment = (props) => {
         )}
 
         {/* Upload Button (Centered) */}
-        {isSelected && <label className="relative overflow-hidden">
-          <input
-            type="file"
-            className="hidden"
-            onChange={handleUpload}
-            accept="audio/*"
-            ref={audioFileInputRef}
-          />
-          <Lottie
-            animationData={animationData}
-            className="lottie-animation-home cursor-pointer"
-            onClick={handleUploadButton}
-          />
-        </label>}
+        {/* Upload Button (Centered) */}
+        {isSelected && (
+  <div className="relative overflow-hidden">
+    <input
+      type="file"
+      className="hidden"
+      onChange={handleUpload}
+      accept="audio/*"
+      ref={audioFileInputRef}
+    />
+    <Lottie
+      animationData={animationData}
+      className="lottie-animation-home cursor-pointer"
+      onClick={handleUploadButton}
+    />
+  </div>
+)}
 
         {audioUrl && isSelected && (
           <>
@@ -179,9 +183,9 @@ const Sentiment = (props) => {
         )}
 
         {/* Display Predicted Emotion */}
-        {predictedEmotion && isSelected && (
+        {predictedText && isSelected && (
           <div className="mt-8 text-2xl text-rose-500 font-normal">
-            Decode the Feels: Emotion Unveiled - {predictedEmotion}
+              <span className="text-3xl font-semibold dark:text-white">{predictedText}</span><br/>
           </div>
         )}
 
@@ -222,9 +226,8 @@ const Sentiment = (props) => {
           )}
 
           {
-            !isSelected && predictedEmotion && (
+            !isSelected && predictedText && (
               <div className="mt-8 text-2xl text-rose-500 font-normal">
-              Decode the Feels: Emotion Unveiled - {predictedEmotion}<br/>
               <span className="text-3xl font-semibold dark:text-white">{predictedText}</span><br/>
               {/* {sentimentAnalysis.map((sentiment, index) => (
                 <div key={index}>
