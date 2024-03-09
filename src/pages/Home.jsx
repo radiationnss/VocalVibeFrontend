@@ -64,7 +64,7 @@ const Home = (props) => {
 
     setTimeout(() => {
       stopRec();
-    }, 3000);
+    }, 4000);
   };
 
   const stopRec = () => {

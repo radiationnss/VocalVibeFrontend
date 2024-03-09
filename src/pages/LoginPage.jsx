@@ -21,6 +21,8 @@ const LoginPage = (props) => {
     password: "",
   });
 
+  const [errorMessage, setErrorMessage] = useState('');
+
   const handleChange = (e) => {
     // const [name, value] = e.target; change to one below
     const { name, value } = e.target;
@@ -74,6 +76,8 @@ const LoginPage = (props) => {
       } else {
         // Login failed
         console.error('Login failed:', response.statusText);
+        setErrorMessage("Invalid email or password");
+        console.log(errorMessage)
       }
     } catch (error) {
       console.error('Error:', error.message);
@@ -129,6 +133,9 @@ const LoginPage = (props) => {
                 styles='group relative w-full flex justify-center py-2.5 2xl:py-3 px-4 border border-transparent text-sm font-medium rounded-full text-white bg-black dark:bg-rose-800 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 mt-8'
               />
             </form>
+            {errorMessage && (
+              <div className="text-red-500">{errorMessage}</div>
+            )}
 
             <div className='flex items-center justify-center text-gray-600 dark:text-gray-300'>
               <p>

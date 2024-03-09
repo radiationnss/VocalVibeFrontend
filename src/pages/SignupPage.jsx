@@ -10,6 +10,9 @@ import { Button, Divider, Inputbox, Logo } from "../components";
 const SignupPage = () => {
   //const user = {};
   const navigate = useNavigate();
+  const [errorMessage, setErrorMessage] = useState('');
+  const [passwordValid, setPasswordValid] = useState(true); // State variable to track password validation
+
 
   const [showForm, setShowForm] = useState(false);
   const [data, setData] = useState({
@@ -40,6 +43,13 @@ const SignupPage = () => {
       password: data.password,
     };
 
+        // Password validation
+        if (!/(?=.*\d)(?=.*[a-zA-Z]).{8,}/.test(data.password)) {
+          setPasswordValid(false);
+          setErrorMessage("Password should be minimum 8 characters long and contain both letters and numbers.");
+          return;
+        }
+
     try {
       const response = await fetch('http://127.0.0.1:8000/api/users/register', {
         method: 'POST',
@@ -58,6 +68,7 @@ const SignupPage = () => {
       } else {
         // Registration failed
         console.error('Registration failed:', response.statusText);
+        setErrorMessage("Email already exists");
       }
     } catch (error) {
       console.error('Error:', error.message);
@@ -163,7 +174,9 @@ const SignupPage = () => {
                     </label>
                   </div> */}
                 </div>
-
+                {errorMessage && (
+                  <div className="text-red-500">{errorMessage}</div>
+                )}
                 <Button
                   label='Create Account'
                   type='submit'
