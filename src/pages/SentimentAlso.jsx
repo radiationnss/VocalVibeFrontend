@@ -10,6 +10,7 @@ import mic from "../assets/mic.svg";
 import animationData1 from '../components/lot.json';
 import animationData2 from '../components/lots2.json';
 import confetti from 'canvas-confetti';
+import { Link } from "react-router-dom";
 
 const Sentiment = () => {
   const [audioFile, setAudioFile] = useState(null);
@@ -123,170 +124,192 @@ const Sentiment = () => {
   const handleUploadButton = () => {
     audioFileInputRef.current.click();
   };
+  const isNeutral = (sentimentAnalysis) => {
+    return Object.values(sentimentAnalysis).every(value => value === 0);
+  }
 
   return (
     <>
-    <Navbar />
-    <div className="w-full h-full flex flex-col items-center justify-center mt-8  text-white">
-      <h1 className="text-4xl text-center mb-16 animate-pulse">
-        <span className="text-3xl font-semibold">Decode Your Voice,</span> <br />
-        <span className="text-3xl font-semibold">Discover Your True Emotions</span> <br />
-        <span className="text-3xl font-semibold">Sentiment Analysis</span>
-      </h1>
+      <Navbar />
+      <div className="w-full h-full flex flex-col items-center justify-center mt-8  text-white">
+        <h1 className="text-4xl text-center mb-16 animate-pulse">
+          <span className="text-3xl font-semibold">Discover Your True Emotions,</span> <br />
+          <span className="text-3xl font-semibold">Using Sentiment Analysis</span>
+        </h1>
 
-      {/* Loading bar */}
-      {loading && (
-        <div className="w-full bg-gray-300 h-2 rounded-full overflow-hidden">
-          <div className="bg-white h-full animate-loading-bar"></div>
-        </div>
-      )}
+        {/* Loading bar */}
+        {loading && (
+          <div className="w-24 h-24 rounded-full border-8 border-white border-t-8 border-t-rose-500 animate-spin"></div>
+        )}
 
-      {/* Upload Button (Centered) */}
-      {isSelected && (
-        <label className="relative overflow-hidden">
-          <input
-            type="file"
-            className="hidden"
-            onChange={handleUpload}
-            accept="audio/*"
-            ref={audioFileInputRef}
-          />
+        {/* Upload Button (Centered) */}
+        {isSelected && (
+          <label className="relative overflow-hidden">
+            <input
+              type="file"
+              className="hidden"
+              onChange={handleUpload}
+              accept="audio/*"
+              ref={audioFileInputRef}
+            />
+            <Lottie
+              animationData={animationData}
+              className="lottie-animation-home cursor-pointer animate-bounce"
+              onClick={handleUploadButton}
+            />
+          </label>
+        )}
+
+        {/* Audio Player */}
+        {audioUrl && isSelected && (
+          <div className="mt-4">
+            <audio ref={audioRef} controls>
+              <source src={audioUrl} type="audio/wav" />
+              Your browser does not support the audio element.
+            </audio>
+            <div className="flex justify-center mt-2">
+              <a href={audioUrl} download={`recordings.wav`} className="underline hover:text-rose-300">
+                Download
+              </a>
+            </div>
+          </div>
+        )}
+
+        {/* Predict Button (Visible only after uploading) */}
+        {audioFile && isSelected && (
+          <div
+            className="bg-white text-rose-500 hover:bg-rose-300 hover:text-white px-6 py-3 mt-4 rounded-full cursor-pointer transition-all duration-300 animate-pulse"
+            onClick={handlePredict1}
+          >
+            Predict
+          </div>
+        )}
+
+        {/* Display Predicted Emotion and Sentiment Analysis */}
+        {(predictedEmotion || predictedText || sentimentAnalysis) && isSelected && (
+          <div className="mt-8 text-2xl font-normal animate-bounce">
+            {predictedEmotion && (
+              <div>
+                Decode the Feels: Emotion Unveiled - {predictedEmotion}
+              </div>
+            )}
+            {predictedText && (
+              <div className="mt-4">
+                <span className="text-3xl font-semibold">{predictedText}</span>
+              </div>
+            )}
+            {sentimentAnalysis && (
+              <div className="mt-4">
+                <h2 className="text-2xl font-bold">Sentiment Analysis:</h2>
+                {isNeutral(sentimentAnalysis) ? (
+                  <div className="text-center mt-4">Neutral</div>
+                ) : (
+                  <div className="grid grid-cols-3 gap-4 mt-2">
+                    {Object.entries(sentimentAnalysis).map(([sentiment, value]) => (
+                      <div key={sentiment} className="bg-white text-rose-500 rounded-lg p-4">
+                        <p className="font-bold">{sentiment}</p>
+                        <p>{value}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Recording part */}
+        {!recordingOrNotRecording && !isSelected && (
           <Lottie
-            animationData={animationData}
-            className="lottie-animation-home cursor-pointer animate-bounce"
-            onClick={handleUploadButton}
+            animationData={animationData1}
+            className="lottie-animation-home cursor-pointer animate-pulse"
+            onClick={startRec}
           />
-        </label>
-      )}
+        )}
 
-      {audioUrl && isSelected && (
-        <>
-          <audio ref={audioRef} controls className="mt-4">
-            <source src={audioUrl} type="audio/wav" />
-            Your browser does not support the audio element.
-          </audio>
-          <a href={audioUrl} download={`recordings.wav`} className="mt-2 underline hover:text-rose-300">
-            Download
-          </a>
-        </>
-      )}
+        {recordingOrNotRecording && !isSelected && (
+          <Lottie
+            animationData={animationData2}
+            className="lottie-animation-home cursor-pointer animate-spin"
+             
+          />
+        )}
 
-      {/* Predict Button (Visible only after uploading) */}
-      {audioFile && isSelected && (
+        {!isSelected && recordings.length > 0 && (
+          <div className="mt-4">
+            <audio controls src={recordings[recordings.length - 1]} />
+            <div className="flex justify-center mt-2">
+              <a href={recordings[recordings.length - 1]} className="underline hover:text-rose-300" download={`recordings.wav`}>
+                Download
+              </a>
+            </div>
+          </div>
+        )}
+
+        {!isSelected && audioFile && (
+          <button onClick={handlePredict1} className="bg-white text-rose-500 hover:bg-rose-300 hover:text-white px-6 py-3 mt-4 rounded-full cursor-pointer transition-all duration-300 animate-pulse">
+            Predict
+          </button>
+        )}
+
+        {!isSelected && (predictedEmotion || predictedText || sentimentAnalysis) && (
+          <div className="mt-8 text-2xl font-normal justify-center">
+            {predictedEmotion && (
+              <div>
+                Decode the Feels: Emotion Unveiled - {predictedEmotion}
+              </div>
+            )}
+            {predictedText && (
+              <div className="mt-4">
+                <span className="text-3xl font-semibold text-center">{predictedText}</span>
+              </div>
+            )}
+            {sentimentAnalysis && (
+              <div className="mt-4 justify-center">
+                <h2 className="text-2xl font-bold text-center">Sentiment:</h2>
+                {isNeutral(sentimentAnalysis) ? (
+                  <div className="text-center mt-4">Neutral</div>
+                ) : (
+                  <div className="grid grid-cols-3 gap-4 mt-2 content-center">
+                    {Object.entries(sentimentAnalysis).map(([sentiment, value]) => (
+                      <div key={sentiment} className="bg-white text-rose-500 rounded-lg p-4">
+                        <p className="font-bold">{sentiment}</p>
+                        <p>{value}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         <div
-          className="bg-white text-rose-500 hover:bg-rose-300 hover:text-white px-6 py-3 mt-4 rounded-full cursor-pointer transition-all duration-300 animate-pulse"
-          onClick={handlePredict1}
-        >
-          Predict
-        </div>
-      )}
-
-      {/* Display Predicted Emotion and Sentiment Analysis */}
-      {(predictedEmotion || predictedText || sentimentAnalysis) && isSelected && (
-        <div className="mt-8 text-2xl font-normal animate-bounce">
-          {predictedEmotion && (
-            <div>
-              Decode the Feels: Emotion Unveiled - {predictedEmotion}
-            </div>
-          )}
-          {predictedText && (
-            <div className="mt-4">
-              <span className="text-3xl font-semibold">{predictedText}</span>
-            </div>
-          )}
-          {sentimentAnalysis && (
-            <div className="mt-4">
-              <h2 className="text-2xl font-bold">Sentiment Analysis:</h2>
-              <div className="grid grid-cols-3 gap-4 mt-2">
-                {Object.entries(sentimentAnalysis).map(([sentiment, value]) => (
-                  <div key={sentiment} className="bg-white text-rose-500 rounded-lg p-4">
-                    <p className="font-bold">{sentiment}</p>
-                    <p>{value}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Recording part */}
-      {!recordingOrNotRecording && !isSelected && (
-        <Lottie
-          animationData={animationData1}
-          className="lottie-animation-home cursor-pointer animate-pulse"
-          onClick={startRec}
-        />
-      )}
-
-      {recordingOrNotRecording && !isSelected && (
-        <Lottie
-          animationData={animationData2}
-          className="lottie-animation-home cursor-pointer animate-spin"
-        />
-      )}
-
-      {recordings.map((recUrl, index) => (
-        <div key={index} className="mt-4">
-          <audio controls src={recUrl} />
-          <a href={recUrl} className="ml-2 underline hover:text-rose-300" download={`recordings-${index}.wav`}>
-            Download
-          </a>
-        </div>
-      ))}
-
-      {!isSelected && audioFile && (
-        <button onClick={handlePredict1} className="bg-white text-rose-500 hover:bg-rose-300 hover:text-white px-6 py-3 mt-4 rounded-full cursor-pointer transition-all duration-300 animate-pulse">
-          Predict
-        </button>
-      )}
-
-      {!isSelected && (predictedEmotion || predictedText || sentimentAnalysis) && (
-        <div className="mt-8 text-2xl font-normal justify-center">
-          {predictedEmotion && (
-            <div>
-              Decode the Feels: Emotion Unveiled - {predictedEmotion}
-            </div>
-          )}
-          {predictedText && (
-            <div className="mt-4">
-              <span className="text-3xl font-semibold text-center">{predictedText}</span>
-            </div>
-          )}
-          {sentimentAnalysis && (
-            <div className="mt-4 justify-center">
-              <h2 className="text-2xl font-bold text-center">Sentiment:</h2>
-              <div className="grid grid-cols-3 gap-4 mt-2 content-center">
-                {Object.entries(sentimentAnalysis).map(([sentiment, value]) => (
-                  <div key={sentiment} className="bg-white text-rose-500 rounded-lg p-4">
-                    <p className="font-bold">{sentiment}</p>
-                    <p>{value}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      <div
-        onClick={() => setIsSelected(!isSelected)}
-        className={classNames("flex w-20 h-10 bg-white m-10 rounded-full cursor-pointer transition-all duration-300", {
-          'bg-green-500': isSelected,
-        })}
-      >
-        <span
-          className={classNames('h-10 w-10 bg-rose-500 rounded-full flex items-center justify-center transition-all duration-300', {
-            'ml-10': isSelected,
+          onClick={() => setIsSelected(!isSelected)}
+          className={classNames("flex w-20 h-10 bg-white m-10 rounded-full cursor-pointer transition-all duration-300", {
+            'bg-rose-500': isSelected,
           })}
         >
-          {isSelected && <img src={upload} className="p-1 animate-spin" />}
-          {!isSelected && <img src={mic} className="animate-pulse" />}
-        </span>
+          <span
+            className={classNames('h-10 w-10 bg-rose-500 rounded-full flex items-center justify-center transition-all duration-300', {
+              'ml-10': isSelected,
+            })}
+          >
+            {isSelected && <img src={upload} className="p-1 animate-spin" />}
+            {!isSelected && <img src={mic} className="animate-pulse" />}
+          </span>
+        </div>
+        {/* Added text */}
+        <div className="flex items-center mt-4">
+          <span className="text-white mr-2">Or you want</span>
+          <Link to="/home" className="text-rose-500 hover:text-rose-300 transition-colors duration-300">
+            audio emotion recognition
+          </Link>
+        </div>
       </div>
-    </div>
-  </>
-);
+    </>
+  );
 };
 
 export default Sentiment;
+     

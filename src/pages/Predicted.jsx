@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import Navbar from "../components/Navbar";
 import axios from "axios";
-import moment from "moment"; // Import moment library
+import moment from "moment";
 
 const PredictedPage = () => {
   const [history, setHistory] = useState(null);
@@ -24,17 +24,19 @@ const PredictedPage = () => {
         console.error("Error fetching data:", error.message);
       }
     };
-
     fetchData();
   }, [token.access]);
 
   const deleteUserPredictions = async () => {
     try {
-      const response = await axios.delete('http://127.0.0.1:8000/api/predict/delete-predictions/', {
-        headers: {
-          Authorization: `Bearer ${token.access}`,
-        },
-      });
+      const response = await axios.delete(
+        'http://127.0.0.1:8000/api/predict/delete-predictions/',
+        {
+          headers: {
+            Authorization: `Bearer ${token.access}`,
+          },
+        }
+      );
       if (response.status === 204) {
         setHistory(response.data);
       } else {
@@ -49,13 +51,18 @@ const PredictedPage = () => {
     <>
       <Navbar />
       <div className="container mx-auto">
-        <button onClick={deleteUserPredictions}>delete</button>
+        <button
+          className="bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-300 shadow-md"
+          onClick={deleteUserPredictions}
+        >
+          Delete History
+        </button>
         <table className="table-fixed w-full text-white border border-collapse rounded-lg shadow-md">
           <thead>
             <tr className="bg-gray-700 text-center">
               <th className="px-4 py-2">#</th>
               <th className="px-4 py-2">Emotion</th>
-              <th className="px-4 py-2">text</th>
+              <th className="px-4 py-2">Text</th>
               <th className="px-4 py-2">Time</th>
             </tr>
           </thead>

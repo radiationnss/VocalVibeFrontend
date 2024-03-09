@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar";
 import Button from "../components/Button";
 import Lottie from 'lottie-react';
 import animationData from '../components/lot.json';
-import { useSelector, useDispatch } from "react-redux"; // Import the useSelector hook
+import { useSelector, useDispatch } from "react-redux";
 import classNames from "classnames";
 import upload from "../assets/upload.svg";
 import mic from "../assets/mic.svg";
@@ -12,25 +12,24 @@ import animationData1 from '../components/lot.json';
 import animationData2 from '../components/lots2.json';
 import Loading from '../components/Loading.jsx';
 import confetti from 'canvas-confetti';
+import { Link } from 'react-router-dom';
 
 const Home = (props) => {
   const [audioFile, setAudioFile] = useState(null);
   const [predictedEmotion, setPredictedEmotion] = useState(null);
-  const [audioUrl, setAudioUrl] = useState(null);  // New state to store the audio URL
-  const audioRef = useRef(null);  // Ref for the audio element
-  const isAuthenticated = useSelector((state) => state.user.isAuthenticated); // Access the isAuthenticated state from the Redux store
+  const [audioUrl, setAudioUrl] = useState(null);
+  const audioRef = useRef(null);
+  const isAuthenticated = useSelector((state) => state.user.isAuthenticated);
   const token = useSelector(state => state.user.token);
   const [isSelected, setIsSelected] = useState(false);
-  const [loading, setLoading] = useState(false); // Loading state
+  const [loading, setLoading] = useState(false);
 
   const audioChunks = useRef([]);
   const [recordings, setRecordings] = useState([]);
   const mediaRecorderRef = useRef(null);
   const [recordingOrNotRecording, setRecordingOrNotRecording] = useState(false);
 
-  
   useEffect(() => {
-    // Your function to be triggered when isSelected changes
     resetValues();
   }, [isSelected]);
 
@@ -64,7 +63,7 @@ const Home = (props) => {
 
     setTimeout(() => {
       stopRec();
-    }, 4000);
+    }, 5000);
   };
 
   const stopRec = () => {
@@ -125,52 +124,52 @@ const Home = (props) => {
 
   return (
     <>
-      <Navbar />
-      <div className="w-full h-full flex flex-col items-center justify-center mt-8">
-      <h1 className="text-4xl text-center mb-16">
-          <span className="text-3xl font-semibold dark:text-white">Decode Your Voice,</span> <br/>
-          <span className="text-3xl font-semibold text-rose-500">Discover Your True Emotions</span>
-        </h1>
+    <Navbar />
+    <div className="w-full h-full flex flex-col items-center justify-center mt-8  text-white">
+      <h1 className="text-4xl text-center mb-16 animate-pulse">
+        <span className="text-3xl font-semibold">Decode Your Voice,</span> <br />
+        <span className="text-3xl font-semibold text-rose-500">Discover Your True Emotions</span>
+      </h1>
 
-        {/* Loading bar */}
-        {loading && (
-          <div className="w-full bg-gray-300 h-2 rounded-full overflow-hidden">
-            <div className="bg-rose-500 h-full animate-loading-bar"></div>
-          </div>
+       {/* Loading bar */}
+       {loading && (
+          <div className="w-24 h-24 rounded-full border-8 border-white border-t-8 border-t-rose-500 animate-spin"></div>
         )}
 
         {/* Upload Button (Centered) */}
         {isSelected && (
-  <div className="relative overflow-hidden">
-    <input
-      type="file"
-      className="hidden"
-      onChange={handleUpload}
-      accept="audio/*"
-      ref={audioFileInputRef}
-    />
-    <Lottie
-      animationData={animationData}
-      className="lottie-animation-home cursor-pointer"
-      onClick={handleUploadButton}
-    />
-  </div>
-)}
+          <div className="relative overflow-hidden">
+            <input
+              type="file"
+              className="hidden"
+              onChange={handleUpload}
+              accept="audio/*"
+              ref={audioFileInputRef}
+            />
+            <Lottie
+              animationData={animationData}
+              className="lottie-animation-home cursor-pointer animate-bounce"
+              onClick={handleUploadButton}
+            />
+          </div>
+        )}
 
         {audioUrl && isSelected && (
           <>
-          <audio ref={audioRef} controls>
-            <source src={audioUrl} type="audio/wav" />
-            Your browser does not support the audio element.
-          </audio>
-          <a href={audioUrl} download={`recordings.wav`}>download</a>
+            <audio ref={audioRef} controls className="mt-4">
+              <source src={audioUrl} type="audio/wav" />
+              Your browser does not support the audio element.
+            </audio>
+            <a href={audioUrl} download={`recordings.wav`} className="mt-2 underline hover:text-rose-300">
+              Download
+            </a>
           </>
         )}
 
         {/* Predict Button (Visible only after uploading) */}
         {audioFile && isSelected && (
           <div
-            className="bg-rose-500 hover:bg-rose-600 px-6 py-3 mt-4 rounded-full text-white cursor-pointer transition-all duration-300"
+            className="bg-white text-rose-500 hover:bg-rose-300 hover:text-white px-6 py-3 mt-4 rounded-full cursor-pointer transition-all duration-300 animate-pulse"
             onClick={handlePredict1}
           >
             Predict
@@ -179,75 +178,74 @@ const Home = (props) => {
 
         {/* Display Predicted Emotion */}
         {predictedEmotion && isSelected && (
-          <div className="mt-8 text-2xl text-rose-500 font-normal">
+          <div className="mt-8 text-2xl font-normal animate-bounce">
             Decode the Feels: Emotion Unveiled - {predictedEmotion}
           </div>
         )}
 
-
-        {/* recording part */}
-
+        {/* Recording part */}
         {!recordingOrNotRecording && !isSelected && (
-            <Lottie
+          <Lottie
             animationData={animationData1}
-            className="lottie-animation-home cursor-pointer"
+            className="lottie-animation-home cursor-pointer animate-pulse"
             onClick={startRec}
           />
-          )
-          }
+        )}
 
-
-        {recordingOrNotRecording && !isSelected &&(
-            <Lottie
+        {recordingOrNotRecording && !isSelected && (
+          <Lottie
             animationData={animationData2}
-            className="lottie-animation-home cursor-pointer"
+            className="lottie-animation-home cursor-pointer animate-spin"
           />
-          )
-          }
+        )}
 
-          {recordings.map((recUrl, index) => (
-            <div key={index}>
-              <audio controls src={recUrl} />
-              <a href={recUrl} style={{color:"white"}} download={`recordings-${index}.wav`}>
-                Download
-              </a>
-            </div>
-          ))}
+        {recordings.map((recUrl, index) => (
+          <div key={index} className="mt-4">
+            <audio controls src={recUrl} />
+            <a href={recUrl} className="ml-2 underline hover:text-rose-300" download={`recordings-${index}.wav`}>
+              Download
+            </a>
+          </div>
+        ))}
 
-          {!isSelected && audioFile && (
-            <button onClick={handlePredict1} className="bg-rose-500 hover:bg-rose-600 px-6 py-3 mt-4 rounded-full text-white cursor-pointer transition-all duration-300">
+        {!isSelected && audioFile && (
+          <button onClick={handlePredict1} className="bg-white text-rose-500 hover:bg-rose-300 hover:text-white px-6 py-3 mt-4 rounded-full cursor-pointer transition-all duration-300 animate-pulse">
             Predict
           </button>
-          )}
+        )}
 
-          {
-            !isSelected && predictedEmotion && (
-              <div className="mt-8 text-2xl text-rose-500 font-normal">
-              Decode the Feels: Emotion Unveiled - {predictedEmotion}
-            </div>
-            )
-          }
+        {!isSelected && predictedEmotion && (
+          <div className="mt-8 text-2xl font-normal animate-bounce">
+            Decode the Feels: Emotion Unveiled - {predictedEmotion}
+          </div>
+        )}
 
-
-
-
-
-        <div
-        onClick={() => setIsSelected(!isSelected)}
-        className={classNames("flex w-20 h-10 bg-gray-600 m-10 rounded-full",
-        {
-          'bg-green':isSelected,
-        })}>
-          <span className={
-            classNames('h-10 w-10 bg-white rounded-full transition-all',
-            {'ml-10': isSelected,})}>
-              {isSelected && <img src={upload} className="p-1"/>}
-              {!isSelected && <img src={mic}/>}
-            </span>
+<div
+          onClick={() => setIsSelected(!isSelected)}
+          className={classNames("flex w-20 h-10 bg-white m-10 rounded-full cursor-pointer transition-all duration-300", {
+            'bg-rose-500': isSelected,
+          })}
+        >
+          <span
+            className={classNames('h-10 w-10 bg-rose-500 rounded-full flex items-center justify-center transition-all duration-300', {
+              'ml-10': isSelected,
+            })}
+          >
+            {isSelected && <img src={upload} className="p-1 animate-spin" />}
+            {!isSelected && <img src={mic} className="animate-pulse" />}
+          </span>
         </div>
 
+        {/* Added text */}
+        <div className="flex items-center mt-4">
+          <span className="text-white mr-2">Or you want</span>
+          <Link to="/sentiment" className="text-rose-500 hover:text-rose-300 transition-colors duration-300">
+            text-based sentiment analysis
+          </Link>
+        </div>
       </div>
     </>
   );
 };
-export default Home;
+
+export default Home; 

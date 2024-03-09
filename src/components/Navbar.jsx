@@ -41,11 +41,7 @@ const Navbar = () => {
                 About
               </Link>
             </li>
-            <li>
-              <Link to="/sentiment" className="text-white hover:text-rose-500">
-                sentiment also
-              </Link>
-            </li>
+            
             <li>
             {user && (
   <Link to="/profile" className="text-white hover:text-rose-500">
