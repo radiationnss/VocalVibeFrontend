@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import axios from 'axios';
 import Navbar from "../components/Navbar";
-import Button from "../components/Button";
 import Lottie from 'lottie-react';
 import animationData from '../components/lot.json';
 import { useSelector, useDispatch } from "react-redux";
@@ -10,6 +9,7 @@ import upload from "../assets/upload.svg";
 import mic from "../assets/mic.svg";
 import animationData1 from '../components/lot.json';
 import animationData2 from '../components/lots2.json';
+import microAnimation from '../components/micro.json';
 import Loading from '../components/Loading.jsx';
 import confetti from 'canvas-confetti';
 import { Link } from 'react-router-dom';
@@ -147,8 +147,8 @@ const Home = (props) => {
               ref={audioFileInputRef}
             />
             <Lottie
-              animationData={animationData}
-              className="lottie-animation-home cursor-pointer animate-bounce"
+              animationData={microAnimation}
+              className="lottie-animation-home cursor-pointer"
               onClick={handleUploadButton}
             />
           </div>
@@ -231,8 +231,7 @@ const Home = (props) => {
               'ml-10': isSelected,
             })}
           >
-            {isSelected && <img src={upload} className="p-1 animate-spin" />}
-            {!isSelected && <img src={mic} className="animate-pulse" />}
+            {isSelected ? <img src={upload} className="p-1" /> : <img src={mic} className="animate-pulse" />}
           </span>
         </div>
 
